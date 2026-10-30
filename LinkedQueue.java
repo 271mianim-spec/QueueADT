@@ -1,31 +1,72 @@
-public class LinkedQueue<T> implements QueueInterface {
+public class LinkedQueue<T> implements QueueInterface<T> {
+
+    public LLNode<T> head;
+    public LLNode<T> tail;
+    public int size;
+
+    public LinkedQueue() {
+        head = null;
+        tail = null;
+        size = 0;
+    }
+
     @Override
     public int size() {
-        return 0;
+        return size;
     }
 
     @Override
     public boolean empty() {
-        return false;
+        return size == 0;
     }
 
     @Override
-    public Object add(Object item) {
-        return null;
+    public T add(T item) {
+        LLNode<T> newNode = new LLNode<T>(item);
+
+        if (head == null && tail == null) {
+            head = newNode;
+            tail = newNode;
+        } else {
+            tail.setLink(newNode);
+            tail = newNode;
+        }
+        size++;
+        return item;
     }
 
     @Override
-    public Object peek() throws QueueUnderflowException {
-        return null;
+    public T peek() throws QueueUnderflowException {
+        if (empty()) {
+            throw new QueueUnderflowException("Queue is empty!");
+        }
+        return head.getInfo();
     }
 
     @Override
-    public Object remove() throws QueueUnderflowException {
-        return null;
+    public T remove() throws QueueUnderflowException {
+        if (empty()) {
+            throw new QueueUnderflowException("Queue is empty!");
+        }
+        size--;
+
+        T item =  head.getInfo();
+
+        if (empty()) {
+            head = null;
+            tail = null;
+            return item;
+        }
+
+        head = head.getLink();
+
+        return item;
     }
 
     @Override
     public void clear() {
-
+        head = null;
+        tail = null;
+        size = 0;
     }
 }

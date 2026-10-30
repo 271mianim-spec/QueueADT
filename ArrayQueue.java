@@ -1,6 +1,6 @@
 import java.util.Queue;
 
-public class ArrayQueue<T> implements QueueInterface{
+public class ArrayQueue<T> implements QueueInterface<T>{
 
     private T[] log;
     private int size;
@@ -17,10 +17,12 @@ public class ArrayQueue<T> implements QueueInterface{
     }
 
     public void manageSize() {
-        int newArraySize = 4;
+        int newArraySize = log.length;
 
-        while(newArraySize < size) {
-            newArraySize*=2;
+        if (newArraySize == size) {
+            newArraySize *= 2;
+        } else if (newArraySize/2 >= size) {
+            newArraySize = Math.max(4, newArraySize/2);
         }
 
         if (newArraySize != this.log.length) {
@@ -29,10 +31,20 @@ public class ArrayQueue<T> implements QueueInterface{
 
             int copyingSize = Math.min(this.log.length, size);
 
+            int currentPos = headPos;
             for (int i = 0; i < copyingSize; i++) {
-                temp[i] = this.log[i];
+                temp[i] = this.log[currentPos];
+                currentPos++;
+                if (currentPos == log.length) {
+                    currentPos = 0;
+                }
             }
             this.log = temp;
+            headPos = 0;
+            tailPos = size;
+            if (tailPos == log.length) {
+                tailPos = 0;
+            }
         }
     }
 
@@ -43,34 +55,28 @@ public class ArrayQueue<T> implements QueueInterface{
 
     @Override
     public boolean empty() {
-        System.out.println(size);
         return size == 0;
     }
 
     @Override
-    public Object add(Object item) {
-        size++;
-        if (this.log.length == size || this.log.length / 2 <= this.size) {
+    public T add(T item) {
+
+        if (this.log.length == size) {
             manageSize();
         }
+        size++;
 
-
-        if (tailPos != this.log.length-1) {
-            this.log[tailPos] = (T) item;
-            tailPos++;
-            return tailPos;
-        } else {
-            this.log[headPos] = (T) item;
-            headPos++;
-            if (this.log[headPos] != null) {
-                headPos = 0;
-            }
-            return headPos;
+        log[tailPos] = (T) item;
+        tailPos++;
+        if (tailPos == log.length) {
+            tailPos = 0;
         }
+        return item;
+
     }
 
     @Override
-    public Object peek() throws QueueUnderflowException {
+    public T peek() throws QueueUnderflowException {
         if (empty()) {
             throw new QueueUnderflowException("Queue is empty");
         }
@@ -82,19 +88,20 @@ public class ArrayQueue<T> implements QueueInterface{
     }
 
     @Override
-    public Object remove() throws QueueUnderflowException {
+    public T remove() throws QueueUnderflowException {
         if (empty()) {
             throw new QueueUnderflowException("Queue is empty");
         }
 
-
-
-        Object item = this.peek();
+        T item = log[headPos];
         this.log[this.headPos] = null;
-        this.headPos--;
+        this.headPos++;
+        if (headPos == log.length) {
+            this.headPos = 0;
+        }
 
         size--;
-        if (this.log.length == size || this.log.length / 2 <= this.size) {
+        if (this.log.length / 2 >= this.size) {
             manageSize();
         }
 
